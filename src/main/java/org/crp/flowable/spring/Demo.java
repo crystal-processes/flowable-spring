@@ -5,6 +5,7 @@ import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
 import org.flowable.engine.repository.Deployment;
+import org.flowable.engine.runtime.Execution;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.task.api.Task;
 
@@ -24,7 +25,10 @@ public class Demo {
         Deployment deployment = repositoryService.createDeployment().addClasspathResource("my-process.bpmn20.xml").deploy();
         LOG.info("deployment created");
         ProcessInstance processInstance = runtimeService.createProcessInstanceBuilder().processDefinitionKey("my-process").start();
-        LOG.info("process instance started");
+        LOG.info("process instance started, greeting "+ runtimeService.getVariable(processInstance.getId(), "greeting"));
+        Execution execution = runtimeService.createExecutionQuery().processInstanceId(processInstance.getId()).onlyChildExecutions().singleResult();
+        runtimeService.trigger(execution.getId());
+        LOG.info("execution triggered, greeting "+ runtimeService.getVariable(processInstance.getId(), "greeting"));
         Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId()).singleResult();
         taskService.complete(task.getId());
         LOG.info("task completed");
