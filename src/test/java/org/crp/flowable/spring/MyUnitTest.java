@@ -14,26 +14,30 @@ package org.crp.flowable.spring;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.flowable.engine.RuntimeService;
+import org.flowable.engine.TaskService;
+import org.flowable.engine.runtime.Execution;
 import org.flowable.engine.runtime.ProcessInstance;
-import org.flowable.engine.test.FlowableRule;
+import org.flowable.engine.test.ConfigurationResource;
 import org.flowable.engine.test.Deployment;
+import org.flowable.engine.test.FlowableTest;
 import org.flowable.task.api.Task;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
+@FlowableTest
+@ConfigurationResource("configuration/flowable.cfg.xml")
 public class MyUnitTest {
 
-    @Rule
-    public FlowableRule flowableRule = new FlowableRule();
-
     @Test
-    @Deployment(resources = {"my-process.bpmn20.xml"})
-    public void test() {
-        ProcessInstance processInstance = flowableRule.getRuntimeService().startProcessInstanceByKey("my-process");
+    @Deployment(resources = {"triggerableBpmnError.bpmn20.xml"})
+    public void triggerableBpmnError(RuntimeService runtimeService, TaskService taskService) {
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("bpmn-error-process");
         assertThat(processInstance).isNotNull();
+        Execution execution = runtimeService.createExecutionQuery().processInstanceId(processInstance.getId()).onlyChildExecutions().singleResult();
+        runtimeService.trigger(execution.getId());
 
-        Task task = flowableRule.getTaskService().createTaskQuery().singleResult();
-        assertThat(task.getName()).isEqualTo("Flowable is awesome!");
+        Task task = taskService.createTaskQuery().singleResult();
+        assertThat(task.getName()).isEqualTo("Escalated Task");
     }
 
 }

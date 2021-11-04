@@ -4,7 +4,6 @@ import org.apache.log4j.Logger;
 import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.engine.delegate.JavaDelegate;
 import org.flowable.engine.impl.delegate.TriggerableActivityBehavior;
-import org.flowable.engine.impl.el.FixedValue;
 
 
 public class HelloWorldJavaDelegate implements JavaDelegate, TriggerableActivityBehavior {
